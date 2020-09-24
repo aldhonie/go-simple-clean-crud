@@ -15,24 +15,26 @@ type Car struct {
 	Quantity      int64     `json:"quantity"`
 	Description   string    `json:"description"`
 	Specification string    `json:"specification"`
-	ImageURL      string    `json:"imageURL"`
+	Image         string    `json:"image"`
 	UpdatedAt     time.Time `json:"updated_at"`
 	CreatedAt     time.Time `json:"created_at"`
 }
 
 //CarUsecase represent the Car's usecases
 type CarUsecase interface {
-	Fetch(ctx context.Context, cursor string, num int64) ([]Car, string, error)
+	Fetch(ctx context.Context) ([]Car, string, error)
+	FetchByKeyword(ctx context.Context, keyword string) ([]Car, error)
 	GetByID(ctx context.Context, id int64) (Car, error)
 	Update(ctx context.Context, ar *Car) error
-	GetByName(ctx context.Context, title string) (Car, error)
+	GetByName(ctx context.Context, name string) (Car, error)
 	Store(context.Context, *Car) error
 	Delete(ctx context.Context, id int64) error
 }
 
 // CarRepository represent the Car's repository contract
 type CarRepository interface {
-	Fetch(ctx context.Context, cursor string, num int64) (res []Car, nextCursor string, err error)
+	Fetch(ctx context.Context) (res []Car, nextCursor string, err error)
+	FetchByKeyword(ctx context.Context, keyword string) ([]Car, error)
 	GetByID(ctx context.Context, id int64) (Car, error)
 	GetByName(ctx context.Context, name string) (Car, error)
 	Update(ctx context.Context, ar *Car) error

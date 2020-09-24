@@ -8,87 +8,98 @@ import (
 )
 
 type carUsecase struct {
-	carRepo        domain.CarRepository
+	carRepository  domain.CarRepository
 	contextTimeout time.Duration
 }
 
-//NewCarUsecase will create new an  carUsecase object representation of domain.CarUsecase interface
+//NewCarUsecase will create new carUsecase object representation of domain.CarUsecase interface
 func NewCarUsecase(a domain.CarRepository, timeout time.Duration) domain.CarUsecase {
 	return &carUsecase{
-		carRepo:        a,
+		carRepository:  a,
 		contextTimeout: timeout,
 	}
 }
 
-func (a *carUsecase) Fetch(c context.Context, cursor string, num int64) (res []domain.Car, nextCursor string, err error) {
-	if num == 0 {
-		num = 10
-	}
+func (a *carUsecase) Fetch(c context.Context) (res []domain.Car, nextCursor string, err error) {
 
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
 
-	res, nextCursor, err = a.carRepo.Fetch(ctx, cursor, num)
-	if err != nil {
-		return nil, "", err
-	}
+	return a.carRepository.Fetch(ctx)
+}
 
-	return
+func (a *carUsecase) FetchByKeyword(c context.Context, keyword string) (res []domain.Car, err error) {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
+	defer cancel()
+
+	return a.carRepository.FetchByKeyword(ctx, keyword)
 }
 
 func (a *carUsecase) GetByID(c context.Context, id int64) (res domain.Car, err error) {
+
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
 
-	res, err = a.carRepo.GetByID(ctx, id)
-	if err != nil {
-		return
-	}
-
-	return
+	return a.carRepository.GetByID(ctx, id)
 }
 
-func (a *carUsecase) Update(c context.Context, ar *domain.Car) (err error) {
+func (a *carUsecase) Update(c context.Context, dc *domain.Car) (err error) {
+
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
 
-	ar.UpdatedAt = time.Now()
-	return a.carRepo.Update(ctx, ar)
+	dc.UpdatedAt = time.Now()
+
+	return a.carRepository.Update(ctx, dc)
 }
 
-func (a *carUsecase) GetByNamw(c context.Context, title string) (res domain.Car, err error) {
+func (a *carUsecase) GetByName(c context.Context, name string) (res domain.Car, err error) {
+
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
 
-	res, err = a.carRepo.GetByName(ctx, title)
-	if err != nil {
-		return
-	}
-
-	return
+	return a.carRepository.GetByName(ctx, name)
 }
 
-func (a *carUsecase) Store(c context.Context, m *domain.Car) (err error) {
+func (a *carUsecase) Store(c context.Context, dc *domain.Car) (err error) {
+
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
-	existedCar, _ := a.GetByName(ctx, m.Name)
+
+	existedCar, _ := a.GetByName(ctx, dc.Name)
+
 	if existedCar != (domain.Car{}) {
 		return domain.ErrConflict
 	}
 
-	err = a.carRepo.Store(ctx, m)
-	return
+	dc.UpdatedAt = time.Now()
+	dc.CreatedAt = time.Now()
+
+	return a.carRepository.Store(ctx, dc)
 }
 
 func (a *carUsecase) Delete(c context.Context, id int64) (err error) {
+
 	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+
 	defer cancel()
-	existedCar, err := a.carRepo.GetByID(ctx, id)
+
+	existedCar, err := a.carRepository.GetByID(ctx, id)
+
 	if err != nil {
 		return
 	}
+
 	if existedCar == (domain.Car{}) {
 		return domain.ErrNotFound
 	}
-	return a.carRepo.Delete(ctx, id)
+
+	return a.carRepository.Delete(ctx, id)
 }

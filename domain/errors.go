@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	//ErrInternalServerError will throw  if any  the Internal  Server error happen
-	ErrInternalServerError = errors.New("Inernal Server Error")
+	ErrInternalServerError = errors.New("Internal Server Error")
 	//ErrNotFound will throw if the requested item is not exists
 	ErrNotFound = errors.New("Your Requested item not found")
 	//ErrConflict will throw if the current action already exists

@@ -7,12 +7,15 @@ import (
 	"net/url"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
 
-	_carHttpDelivery "github.com/aldhonie/go-simple-clean-crud/article/delivery/http"
+	_carHttpDelivery "github.com/aldhonie/go-simple-clean-crud/car/delivery/http"
 	_carHttpDeliveryMiddleware "github.com/aldhonie/go-simple-clean-crud/car/delivery/http/middleware"
-	_carRepo "github.com/aldhonie/go-simple-clean-crud/car/repository/mysql"
+	_carRepository "github.com/aldhonie/go-simple-clean-crud/car/repository/mysql"
+	_carUsecase "github.com/aldhonie/go-simple-clean-crud/car/usecase"
 )
 
 func init() {
@@ -41,7 +44,7 @@ func main() {
 	val.Add("loc", "Asia/Jakarta")
 
 	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
-	dbConn, err := sql.Open(`mysql`, dsn)
+	dbConn, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,11 +63,11 @@ func main() {
 	e := echo.New()
 	middleware := _carHttpDeliveryMiddleware.InitMiddleware()
 	e.Use(middleware.CORS)
-	ar := _carRepo.NewMysqlCarRepository(dbConn)
+	cr := _carRepository.NewMysqlCarRepository(dbConn)
 
-	timeoutContext := time.Duration(viper.Getint("context.Timeout")) * time.Second
-	au := _carUsecase.NewCarUsecase(ar, authorRepo, timeoutContext)
-	_carHttpDelivery.NewCarHandler(e, au)
+	timeoutContext := time.Duration(viper.GetInt("context.Timeout")) * time.Second
+	cu := _carUsecase.NewCarUsecase(cr, timeoutContext)
+	_carHttpDelivery.NewCarHandler(e, cu)
 
 	log.Fatal(e.Start(viper.GetString("server.address")))
 }

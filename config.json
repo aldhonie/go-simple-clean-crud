@@ -7,11 +7,14 @@
       "timeout":2
     },
     "database": {
-        "host": "mysql",
+        "host": "127.0.0.1",
         "port": "3306",
         "user": "root",
         "pass": "root",
-        "name": "article"
+        "name": "blue_bird"
+    },
+    "middleware": {
+      "x-api-key" : "blue_bird_assignment_aldhonie"
     }
   
 }
